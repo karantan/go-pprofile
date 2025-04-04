@@ -1,48 +1,53 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"runtime/pprof"
-	"time"
 )
 
+var cpuprofile = flag.Bool("cpuprofile", false, "enable CPU profiling and write to cpu.prof file")
+
 func main() {
-	f, err := os.Create("cpu.prof")
-	if err != nil {
-		log.Fatal("could not create CPU profile: ", err)
+	flag.Parse()
+	if *cpuprofile {
+		f, err := os.Create("cpu.prof")
+		if err != nil {
+			log.Fatal("could not create CPU profile: ", err)
+		}
+		defer f.Close()
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("could not start CPU profile: ", err)
+		}
+		defer pprof.StopCPUProfile()
 	}
-	defer f.Close()
-
-	if err := pprof.StartCPUProfile(f); err != nil {
-		log.Fatal("could not start CPU profile: ", err)
-	}
-	defer pprof.StopCPUProfile()
-
+	// Simulate some work
 	doWork()
 }
 
 func doWork() {
-	for i := 0; i < 10; i++ {
-		busyWork()
-		time.Sleep(50 * time.Millisecond) // shorter sleep to keep CPU busy
-	}
+	fmt.Println(FibonacciRecursion(45))
+	fmt.Println(FibonacciLoop(45))
 }
 
-var result int // global variable to hold the computation result
-func busyWork() {
-	data := make([]string, 3)
-	sum := 0
-	// Loop for a significant number of iterations
-	for i := 0; i < 10000000; i++ {
-		// Perform some arithmetic operations
-		sum += (i * i) % 100
-		// Append to the slice to simulate memory allocation
-		data = append(data, "magical pprof time")
-		// Simulate some string operations
-		if i%1000000 == 0 {
-			data = append(data, "hello world")
-		}
+func FibonacciRecursion(n int) int {
+	if n <= 1 {
+		return n
 	}
-	result = sum // store the result to avoid optimization
+	return FibonacciRecursion(n-1) + FibonacciRecursion(n-2)
+}
+
+func FibonacciLoop(n int) int {
+	f := make([]int, n+1, n+2)
+	if n < 2 {
+		f = f[0:2]
+	}
+	f[0] = 0
+	f[1] = 1
+	for i := 2; i <= n; i++ {
+		f[i] = f[i-1] + f[i-2]
+	}
+	return f[n]
 }

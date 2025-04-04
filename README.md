@@ -13,7 +13,7 @@ Sandbox for testing code profiling with pprof
 Compile and run your program:
 
 ```bash
-go run main.go
+go run main.go -cpuprofile
 ```
 
 This generates a cpu.prof file containing the CPU profile data. Make sure cpu.prof exists in your working directory.
@@ -32,9 +32,9 @@ This will open an interactive shell where you can use several commands.
 
 Common pprof Commands:
 
-`top`: Displays the top functions consuming the most CPU.
+`topX`: Displays the top functions consuming the most CPU and the -cum flag shows the cumulative time taken.
 ```
-(pprof) top
+(pprof) top5 -cum
 ```
 
 
@@ -60,3 +60,8 @@ Example:
 **Cumulative (Cum) Time**: This includes the time spent in the function itself plus all the time spent in its callees. It’s a measure of the total time "accumulated" by that function’s call tree.
 
 For example, if function A calls function B, and function B takes some time to execute, the flat time for A would only include the work it does itself, while the cumulative time for A would include both its own work and the time spent in B.
+
+
+## Additional resources
+
+- [The Go Blog: Profiling Go Programs](https://go.dev/blog/pprof)
